@@ -2,33 +2,24 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 function statement(invoice, plays) {
-  let totalAmount = 0;
   let result = `Statement for ${invoice.customer}\n`;
 
   for (let perf of invoice.performances) {
     // print line for this order
     result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
-    totalAmount += amountFor(perf);
   }
 
   // 
-  // Step 6: Split Loop
+  // Step 7: Split Loop to remove the totalAmount calculation from the loop that prints the statement.
+  //
+  // Step 7: Slide Statement: Move the totalAmount calculation to a separate loop.
   // 
-  // Step 6: Slide Statement: move volumeCredits initialization near the top of the function, and add a new loop to calculate volumeCredits.
-  // 
-  // Step 6: Extract Function: extract the volumeCredits calculation into a separate function.
-  // let volumeCredits = 0;
+  // Step 7: Extact Function: extract the totalAmount calculation into a separate function.
+  // let totalAmount = 0;
   // for (let perf of invoice.performances) {
-  //   volumeCredits += volumeCreditsFor(perf);
-  //   // print line for this order
-  //   result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
   //   totalAmount += amountFor(perf);
   // }
-
-  result += `Amount owed is ${usd(totalAmount)}\n`;
-  // 
-  // Step 6: Inline Variable: inline the volumeCredits variable, and replace it with a call to the totalVolumeCredits function.
-  // 
+  result += `Amount owed is ${usd(totalAmount())}\n`;
   result += `You earned ${totalVolumeCredits()} credits\n`;
   return result;
 
@@ -73,13 +64,21 @@ function statement(invoice, plays) {
       }).format(aNumber/100);
   }
 
-  // 
-  // Step 6: Extact Function: extract the volumeCredits calculation into a separate function.
-  // 
   function totalVolumeCredits() {
     let result = 0;
     for (let perf of invoice.performances) {
       result += volumeCreditsFor(perf);
+    }
+    return result;
+  }
+
+  // 
+  // Step 7: Extact Function: extract the totalAmount calculation into a separate function.
+  // 
+  function totalAmount() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+      result += amountFor(perf);
     }
     return result;
   }
