@@ -12,6 +12,31 @@ function statement(invoice, plays) {
     }).format;
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
+
+    // 
+    // Step 1: Extract Function
+    // 
+    // Long function is hard to read, so we can extract a function to calculate the amount for each performance.
+    // 
+    // let thisAmount = 0;
+    let thisAmount = amountFor(perf, play);
+
+    // add volume credits
+    volumeCredits += Math.max(perf.audience - 30, 0);
+    // add extra credit for every ten comedy attendees
+    if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
+    // print line for this order
+    result += ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience} seats)\n`;
+    totalAmount += thisAmount;
+  }
+  result += `Amount owed is ${format(totalAmount / 100)}\n`;
+  result += `You earned ${volumeCredits} credits\n`;
+  return result;
+
+  // 
+  // Step 1: Extract Function
+  // 
+  function amountFor(perf, play) {
     let thisAmount = 0;
     switch (play.type) {
       case "tragedy":
@@ -30,17 +55,8 @@ function statement(invoice, plays) {
       default:
         throw new Error(`unknown type: ${play.type}`);
     }
-    // add volume credits
-    volumeCredits += Math.max(perf.audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
-    // print line for this order
-    result += ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience} seats)\n`;
-    totalAmount += thisAmount;
+    return thisAmount;
   }
-  result += `Amount owed is ${format(totalAmount / 100)}\n`;
-  result += `You earned ${volumeCredits} credits\n`;
-  return result;
 }
 
 module.exports = statement;
