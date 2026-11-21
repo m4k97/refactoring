@@ -3,23 +3,33 @@ const path = require("node:path");
 
 function statement(invoice, plays) {
   let totalAmount = 0;
-  let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
 
   for (let perf of invoice.performances) {
-    volumeCredits += volumeCreditsFor(perf);
     // print line for this order
-    // 
-    // Step 5: Removing the formatting of the amount from the main function to a separate function to improve readability and maintainability.
-    // 
     result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
     totalAmount += amountFor(perf);
   }
+
   // 
-  // Step 5: Removing the formatting of the amount from the main function to a separate function to improve readability and maintainability.
+  // Step 6: Split Loop
   // 
+  // Step 6: Slide Statement: move volumeCredits initialization near the top of the function, and add a new loop to calculate volumeCredits.
+  // 
+  // Step 6: Extract Function: extract the volumeCredits calculation into a separate function.
+  // let volumeCredits = 0;
+  // for (let perf of invoice.performances) {
+  //   volumeCredits += volumeCreditsFor(perf);
+  //   // print line for this order
+  //   result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
+  //   totalAmount += amountFor(perf);
+  // }
+
   result += `Amount owed is ${usd(totalAmount)}\n`;
-  result += `You earned ${volumeCredits} credits\n`;
+  // 
+  // Step 6: Inline Variable: inline the volumeCredits variable, and replace it with a call to the totalVolumeCredits function.
+  // 
+  result += `You earned ${totalVolumeCredits()} credits\n`;
   return result;
 
   function amountFor(aPerformance) {
@@ -55,17 +65,23 @@ function statement(invoice, plays) {
     return result;
   }
 
-  // 
-  // Step 5: Extracting the formatting of the amount into a separate function to improve readability and maintainability.
-  // 
-  // Renaming the function from obscure name to a more descriptive one, indicating that it formats a number as currency.
-  // function format(aNumber) {
   function usd(aNumber) {
     return new Intl.NumberFormat("en-US",
       {
         style: "currency", currency: "USD",
         minimumFractionDigits: 2
       }).format(aNumber/100);
+  }
+
+  // 
+  // Step 6: Extact Function: extract the volumeCredits calculation into a separate function.
+  // 
+  function totalVolumeCredits() {
+    let result = 0;
+    for (let perf of invoice.performances) {
+      result += volumeCreditsFor(perf);
+    }
+    return result;
   }
 }
 
