@@ -11,30 +11,45 @@ function statement(invoice, plays) {
       minimumFractionDigits: 2
     }).format;
   for (let perf of invoice.performances) {
-    const play = plays[perf.playID];
-
-    let thisAmount = amountFor(perf, play);
+    
+    // 
+    // Step 3: Replace Temp with Query + Inline Variable
+    // 
+    // const play = playFor(perf);
+    // 
+    // Step 3: Change Function Declaration
+    // let thisAmount = amountFor(perf, playFor(perf));
+    // Step 3: Inline Variable
+    // let thisAmount = amountFor(perf)
 
     // add volume credits
     volumeCredits += Math.max(perf.audience - 30, 0);
     // add extra credit for every ten comedy attendees
-    if ("comedy" === play.type) volumeCredits += Math.floor(perf.audience / 5);
+    // 
+    // Step 3: Replace Temp with Query + Inline Variable
+    // 
+    if ("comedy" === playFor(perf).type) volumeCredits += Math.floor(perf.audience / 5);
     // print line for this order
-    result += ` ${play.name}: ${format(thisAmount / 100)} (${perf.audience} seats)\n`;
-    totalAmount += thisAmount;
+    // 
+    // Step 3: Replace Temp with Query + Inline Variable
+    // 
+    result += ` ${playFor(perf).name}: ${format(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
+    totalAmount += amountFor(perf);
   }
   result += `Amount owed is ${format(totalAmount / 100)}\n`;
   result += `You earned ${volumeCredits} credits\n`;
   return result;
 
   // 
-  // Step 2: Rename variables
-  // Rename thisAmount to result because it represents the result of the calculation for the current performance.
-  // Rename perf to aPerformance because it represents a single performance in the invoice.
+  // Step 3: Change Function Declaration
   // 
-  function amountFor(aPerformance, play) {
+  // function amountFor(aPerformance, play) {
+  function amountFor(aPerformance) {
     let result = 0;
-    switch (play.type) {
+    // 
+    // Step 3: Inline Variable
+    // 
+    switch (playFor(aPerformance).type) {
       case "tragedy":
         result = 40000;
         if (aPerformance.audience > 30) {
@@ -49,9 +64,19 @@ function statement(invoice, plays) {
         result += 300 * aPerformance.audience;
         break;
       default:
-        throw new Error(`unknown type: ${play.type}`);
+        // 
+        // Step 3: Inline Variable
+        //
+        throw new Error(`unknown type: ${playFor(aPerformance).type}`);
     }
     return result;
+  }
+
+  // 
+  // Step 3: Replace Temp with Query
+  // 
+  function playFor(aPerformance) {
+    return plays[aPerformance.playID];
   }
 }
 
