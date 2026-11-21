@@ -13,12 +13,6 @@ function statement(invoice, plays) {
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
 
-    // 
-    // Step 1: Extract Function
-    // 
-    // Long function is hard to read, so we can extract a function to calculate the amount for each performance.
-    // 
-    // let thisAmount = 0;
     let thisAmount = amountFor(perf, play);
 
     // add volume credits
@@ -34,28 +28,30 @@ function statement(invoice, plays) {
   return result;
 
   // 
-  // Step 1: Extract Function
+  // Step 2: Rename variables
+  // Rename thisAmount to result because it represents the result of the calculation for the current performance.
+  // Rename perf to aPerformance because it represents a single performance in the invoice.
   // 
-  function amountFor(perf, play) {
-    let thisAmount = 0;
+  function amountFor(aPerformance, play) {
+    let result = 0;
     switch (play.type) {
       case "tragedy":
-        thisAmount = 40000;
-        if (perf.audience > 30) {
-          thisAmount += 1000 * (perf.audience - 30);
+        result = 40000;
+        if (aPerformance.audience > 30) {
+          result += 1000 * (aPerformance.audience - 30);
         }
         break;
       case "comedy":
-        thisAmount = 30000;
-        if (perf.audience > 20) {
-          thisAmount += 10000 + 500 * (perf.audience - 20);
+        result = 30000;
+        if (aPerformance.audience > 20) {
+          result += 10000 + 500 * (aPerformance.audience - 20);
         }
-        thisAmount += 300 * perf.audience;
+        result += 300 * aPerformance.audience;
         break;
       default:
         throw new Error(`unknown type: ${play.type}`);
     }
-    return thisAmount;
+    return result;
   }
 }
 
