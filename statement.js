@@ -2,30 +2,44 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 function statement(invoice, plays) {
-  let result = `Statement for ${invoice.customer}\n`;
 
-  for (let perf of invoice.performances) {
-    // print line for this order
-    result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
+  // 
+  // Step 8: Exracting Functions
+  // 
+  // let result = `Statement for ${invoice.customer}\n`;
+
+  // for (let perf of invoice.performances) {
+  //   result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
+  // }
+  // result += `Amount owed is ${usd(totalAmount())}\n`;
+  // result += `You earned ${totalVolumeCredits()} credits\n`;
+  // return result;
+
+  // 
+  // Step 8: Flat belly function - feed with necessary data, not big objects
+  // 
+  const statementData = {};
+  statementData.customer = invoice.customer;
+  statementData.performances = invoice.performances.map(enrichPerformance);
+  statementData.totalAmount = totalAmount(statementData);
+  statementData.totalVolumeCredits = totalVolumeCredits(statementData);
+  return renderPlainText(statementData, plays);
+
+  function enrichPerformance(aPerformance) {
+    const result = Object.assign({}, aPerformance);
+    result.play = playFor(result);
+    result.amount = amountFor(result);
+    result.volumeCredits = volumeCreditsFor(result);
+    return result;
   }
 
-  // 
-  // Step 7: Split Loop to remove the totalAmount calculation from the loop that prints the statement.
-  //
-  // Step 7: Slide Statement: Move the totalAmount calculation to a separate loop.
-  // 
-  // Step 7: Extact Function: extract the totalAmount calculation into a separate function.
-  // let totalAmount = 0;
-  // for (let perf of invoice.performances) {
-  //   totalAmount += amountFor(perf);
-  // }
-  result += `Amount owed is ${usd(totalAmount())}\n`;
-  result += `You earned ${totalVolumeCredits()} credits\n`;
-  return result;
+  function playFor(aPerformance) {
+    return plays[aPerformance.playID];
+  }
 
   function amountFor(aPerformance) {
     let result = 0;
-    switch (playFor(aPerformance).type) {
+    switch (aPerformance.play.type) {
       case "tragedy":
         result = 40000;
         if (aPerformance.audience > 30) {
@@ -40,22 +54,34 @@ function statement(invoice, plays) {
         result += 300 * aPerformance.audience;
         break;
       default:
-        throw new Error(`unknown type: ${playFor(aPerformance).type}`);
+        throw new Error(`unknown type: ${aPerformance.play.type}`);
+    }
+    return result;
+  }
+  
+  function volumeCreditsFor(aPerformance) {
+    let result = 0;
+    result += Math.max(aPerformance.audience - 30, 0);
+    if ("comedy" === aPerformance.play.type) result += Math.floor(aPerformance.audience / 5);
+    return result;
+  }
+
+  function totalVolumeCredits(data) {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += perf.volumeCredits;
     }
     return result;
   }
 
-  function playFor(aPerformance) {
-    return plays[aPerformance.playID];
-  }
-
-  function volumeCreditsFor(aPerformance) {
+  function totalAmount(data) {
     let result = 0;
-    result += Math.max(aPerformance.audience - 30, 0);
-    if ("comedy" === playFor(aPerformance).type) result += Math.floor(aPerformance.audience / 5);
+    for (let perf of data.performances) {
+      result += perf.amount;
+    }
     return result;
   }
-
+  
   function usd(aNumber) {
     return new Intl.NumberFormat("en-US",
       {
@@ -64,22 +90,19 @@ function statement(invoice, plays) {
       }).format(aNumber/100);
   }
 
-  function totalVolumeCredits() {
-    let result = 0;
-    for (let perf of invoice.performances) {
-      result += volumeCreditsFor(perf);
-    }
-    return result;
-  }
 
   // 
-  // Step 7: Extact Function: extract the totalAmount calculation into a separate function.
+  // Step 8: Extracting Functions
   // 
-  function totalAmount() {
-    let result = 0;
-    for (let perf of invoice.performances) {
-      result += amountFor(perf);
+  // Step 8: Flat belly function - feed with necessary data, not big objects
+  function renderPlainText(data, plays) {
+    let result = `Statement for ${data.customer}\n`;
+
+    for (let perf of data.performances) {
+      result += ` ${perf.play.name}: ${usd(perf.amount)} (${perf.audience} seats)\n`;
     }
+    result += `Amount owed is ${usd(data.totalAmount)}\n`;
+    result += `You earned ${data.totalVolumeCredits} credits\n`;
     return result;
   }
 }
