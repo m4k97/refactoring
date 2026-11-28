@@ -3,21 +3,6 @@ const path = require("node:path");
 
 function statement(invoice, plays) {
 
-  // 
-  // Step 8: Exracting Functions
-  // 
-  // let result = `Statement for ${invoice.customer}\n`;
-
-  // for (let perf of invoice.performances) {
-  //   result += ` ${playFor(perf).name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
-  // }
-  // result += `Amount owed is ${usd(totalAmount())}\n`;
-  // result += `You earned ${totalVolumeCredits()} credits\n`;
-  // return result;
-
-  // 
-  // Step 8: Flat belly function - feed with necessary data, not big objects
-  // 
   const statementData = {};
   statementData.customer = invoice.customer;
   statementData.performances = invoice.performances.map(enrichPerformance);
@@ -66,20 +51,29 @@ function statement(invoice, plays) {
     return result;
   }
 
-  function totalVolumeCredits(data) {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += perf.volumeCredits;
-    }
-    return result;
-  }
+  // 
+  // Step 9: Replace loops with piplines
+  // 
 
+  function totalVolumeCredits(data) {
+    // let result = 0;
+    // for (let perf of data.performances) {
+    //   result += perf.volumeCredits;
+    // }
+    // return result;
+
+    return data.performances.reduce((total, p) => total + p.volumeCredits, 0);
+
+  }
+    
   function totalAmount(data) {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += perf.amount;
-    }
-    return result;
+    // let result = 0;
+    // for (let perf of data.performances) {
+    //   result += perf.amount;
+    // }
+    // return result;
+  
+    return data.performances.reduce((total, p) => total + p.amount, 0);
   }
   
   function usd(aNumber) {
@@ -91,10 +85,6 @@ function statement(invoice, plays) {
   }
 
 
-  // 
-  // Step 8: Extracting Functions
-  // 
-  // Step 8: Flat belly function - feed with necessary data, not big objects
   function renderPlainText(data, plays) {
     let result = `Statement for ${data.customer}\n`;
 
