@@ -1,6 +1,3 @@
-// 
-// Step 10-2: Split into two functions
-// 
 export default function createStatementData(invoice, plays) {
   const result = {};
   result.customer = invoice.customer;
